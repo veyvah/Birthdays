@@ -6,21 +6,22 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     
-    @State private var friends: [friend] = [
-        friend(name: "Joan", birthday: .now),
-        friend(name: "Maya", birthday:
-                Date(timeIntervalSince1970: 0))
-    ]
+    @Query private var friends: [friend]
+    @Environment(\.modelContext) private var context
     @State private var newName = ""
     @State private var newBirthday = Date.now
+    
+    
+    
     var body: some View {
         NavigationStack {
             
             
-            List(friends, id: \.name) {friend in
+            List(friends) {friend in
                 HStack {
                     Text(friend.name)
                     Spacer()
@@ -30,35 +31,35 @@ struct ContentView: View {
                 }
             }
             
-        }.navigationTitle("Birthdays")
+            .navigationTitle("Birthdays")
             .safeAreaInset(edge: .bottom) {
-                VStack(alignment: .center, spacing:20) {
+                VStack {
                     Text("New Birthday")
                         .font(.headline)
-                    DatePicker(displayComponents, selection:
-                                $newBirthday,
-                               in: Date.distantPast...Date
-                        .now, displayedComponents:
-                            .date,selection,;
-                               $newBirthday;,
-                               in: Date.distantPast...Date
-                        .now,
-                               TextField("Name", text: $newName)
-                        .textFieldStyle(.roundedBorder)
-                    )
+                    DatePicker(selection: $newBirthday, in: Date.distantPast...Date.now, displayedComponents: .date) {
+                        TextField("Name", text: $newName)
+                            .textFieldStyle(.roundedBorder)
+                    }
                     Button("save") {
                         let newFriend = friend(name: newName, birthday: newBirthday)
-                        friends.append(newFriend)
+                        context.insert(newFriend)
                     }
                     .bold()
                 }
+                .padding()
+                .background(.bar)
+                
             }
+        }
+        
     }
-    
+}
     
     #Preview {
         ContentView()
+            .modelContainer(for: friend.self,
+            inMemory: true)
     }
     
     
-}
+
